@@ -1,4 +1,4 @@
-;;; transfer-sh --- Sending buffers/regions to transfer.sh
+;;; transfer-sh.el --- Sending buffers/regions to transfer.sh
 
 ;; Copyright (C) 2016 Steffen Roskamp
 
