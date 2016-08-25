@@ -48,23 +48,24 @@
   :type '(string)
   :group 'transfer-sh)
 
-(defun transfer-sh-upload (start end)
+(defun transfer-sh-upload ()
   "Uploads either active region of complete buffer to transfer.sh.
 
-START: beginning of region to upload
-END: end of region to upload
-If no region is active, the complete buffer is uploaded."
-  (interactive "r")
+If a region is active, that region is exported to a file and then
+uploaded, otherwise the complete buffer is uploaded.  The remote
+file name is determined by customize-variables and the buffer
+name."
+  (interactive)
   (if (use-region-p)
-      (write-region start end "transfer-sh.tmp" nil 0)
-    (write-region (point-min) (point-max) "transfer-sh.tmp" nil 0))
+      (write-region (region-beginning) (region-end) transfer-sh-temp-file-location nil 0)
+    (write-region (point-min) (point-max) transfer-sh-temp-file-location nil 0))
 
   (setq-local remote-filename
 	      (concat transfer-sh-remote-prefix (buffer-name) transfer-sh-remote-suffix))
   
   (setq-local transfer-link
 	(substring
-	 (shell-command-to-string (concat "curl --silent --upload-file transfer-sh.tmp \"https://transfer.sh/" remote-filename "\""))
+	 (shell-command-to-string (concat "curl --silent --upload-file "  transfer-sh-temp-file-location " \"https://transfer.sh/" remote-filename "\""))
 	 0 -1))
 
   (kill-new transfer-link)
