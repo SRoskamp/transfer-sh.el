@@ -4,7 +4,6 @@
 
 ;; Author: S. Roskamp <steffen.roskamp@gmail.com>
 ;; Keywords: cloud, upload, share
-;; URL: https://github.com/brillow/transfer-sh.el
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
