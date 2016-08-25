@@ -60,17 +60,12 @@ name."
       (write-region (region-beginning) (region-end) transfer-sh-temp-file-location nil 0)
     (write-region (point-min) (point-max) transfer-sh-temp-file-location nil 0))
 
-  (setq-local remote-filename
-	      (concat transfer-sh-remote-prefix (buffer-name) transfer-sh-remote-suffix))
-  
-  (setq-local transfer-link
-	(substring
-	 (shell-command-to-string (concat "curl --silent --upload-file "  transfer-sh-temp-file-location " \"https://transfer.sh/" remote-filename "\""))
-	 0 -1))
-
-  (kill-new transfer-link)
-  (message transfer-link)
-  )
+  (let* ((remote-filename (concat transfer-sh-remote-prefix (buffer-name) transfer-sh-remote-suffix))
+         (transfer-link (substring
+                         (shell-command-to-string (concat "curl --silent --upload-file "  transfer-sh-temp-file-location " \"https://transfer.sh/" remote-filename "\""))
+                         0 -1)))
+    (kill-new transfer-link)
+    (message transfer-link)))
 
 (provide 'transfer-sh)
 
