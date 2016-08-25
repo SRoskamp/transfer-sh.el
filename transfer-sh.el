@@ -3,7 +3,6 @@
 ;; Copyright (C) 2016 Steffen Roskamp
 
 ;; Author: S. Roskamp <steffen.roskamp@gmail.com>
-;; Version: 0.1
 ;; Keywords: cloud, upload, share
 ;; URL: https://github.com/brillow/transfer-sh.el
 
@@ -74,4 +73,5 @@ If no region is active, the complete buffer is uploaded."
   )
 
 (provide 'transfer-sh)
+
 ;;; transfer-sh.el ends here
