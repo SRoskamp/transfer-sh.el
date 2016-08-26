@@ -48,22 +48,31 @@
   :type '(string)
   :group 'transfer-sh)
 
+(defun transfer-sh-upload-backend (text)
+  "Backend function to upload arbitrary TEXT to transfer-sh."
+  (save-excursion
+    (let* ((buf (find-file-noselect transfer-sh-temp-file-location)))
+      (set-buffer buf)
+      (erase-buffer)
+      (princ text buf)
+      (save-buffer)
+      (kill-buffer)))
+
+  (let* ((remote-filename (concat transfer-sh-remote-prefix (buffer-name) transfer-sh-remote-suffix)))
+         (substring
+	  (shell-command-to-string (concat "curl --silent --upload-file "  transfer-sh-temp-file-location " \"https://transfer.sh/" remote-filename "\""))
+	  0 -1)))
+
 (defun transfer-sh-upload ()
-  "Uploads either active region of complete buffer to transfer.sh.
+  "Uploads either the active region or complete buffer to transfer.sh.
 
 If a region is active, that region is exported to a file and then
 uploaded, otherwise the complete buffer is uploaded.  The remote
 file name is determined by customize-variables and the buffer
 name."
   (interactive)
-  (if (use-region-p)
-      (write-region (region-beginning) (region-end) transfer-sh-temp-file-location nil 0)
-    (write-region (point-min) (point-max) transfer-sh-temp-file-location nil 0))
-
-  (let* ((remote-filename (concat transfer-sh-remote-prefix (buffer-name) transfer-sh-remote-suffix))
-         (transfer-link (substring
-                         (shell-command-to-string (concat "curl --silent --upload-file "  transfer-sh-temp-file-location " \"https://transfer.sh/" remote-filename "\""))
-                         0 -1)))
+  (let* ((text (if (use-region-p) (buffer-substring-no-properties (region-beginning) (region-end)) (buffer-string)))
+    (transfer-link (transfer-sh-upload-backend text)))
     (kill-new transfer-link)
     (message transfer-link)))
 
