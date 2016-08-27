@@ -1,3 +1,4 @@
+[[https://melpa.org/#/transfer-sh][file:https://melpa.org/packages/transfer-sh-badge.svg]]
 * transfer-sh.el
   This package provides an interface for uploading data to transfer.sh directly from within Emacs.
   
