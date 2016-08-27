@@ -49,14 +49,52 @@
   :group 'transfer-sh)
 
 ;;;###autoload
-(defun transfer-sh-upload ()
+(defun transfer-sh-upload-file-async (local-filename &optional remote-filename)
+  "Uploads file LOCAL-FILENAME to transfer.sh in background.
+
+If no REMOTE-FILENAME is given, the LOCAL-FILENAME is used."
+  (interactive "ffile: ")
+  (async-start
+   `(lambda ()
+      ,(async-inject-variables "local-filename")
+      ,(async-inject-variables "remote-filename")
+      (substring
+       (shell-command-to-string
+        (concat "curl --silent --upload-file "
+                (shell-quote-argument local-filename)
+                " " (shell-quote-argument (concat "https://transfer.sh/" remote-filename))))
+       0 -1))
+   `(lambda (transfer-link)
+      (kill-new transfer-link)
+      (message transfer-link))))
+
+;;;###autoload
+(defun transfer-sh-upload-file (local-filename &optional remote-filename)
+  "Uploads file LOCAL-FILENAME to transfer.sh.
+
+If no REMOTE-FILENAME is given, the LOCAL-FILENAME is used."
+  (interactive "ffile: ")
+  (let*  ((remote-filename (if remote-filename
+                               remote-filename
+                             (file-name-nondirectory local-filename)))
+          (transfer-link (substring
+                          (shell-command-to-string
+                           (concat "curl --silent --upload-file "
+                                   (shell-quote-argument local-filename)
+                                   " " (shell-quote-argument (concat "https://transfer.sh/" remote-filename))))
+                          0 -1)))
+    (kill-new transfer-link)
+    (message transfer-link)))
+
+;;;###autoload
+(defun transfer-sh-upload (async)
   "Uploads either active region of complete buffer to transfer.sh.
 
 If a region is active, that region is exported to a file and then
 uploaded, otherwise the complete buffer is uploaded.  The remote
 file name is determined by customize-variables and the buffer
 name."
-  (interactive)
+  (interactive "P")
   (let* ((remote-filename (concat transfer-sh-remote-prefix (buffer-name) transfer-sh-remote-suffix))
          (local-filename (if (use-region-p)
                              (progn
@@ -67,19 +105,9 @@ name."
                              (progn
                                (write-region (point-min) (point-max) transfer-sh-temp-file-location nil 0)
                                transfer-sh-temp-file-location)))))
-    (async-start
-     `(lambda ()
-        ,(async-inject-variables "local-filename")
-        ,(async-inject-variables "remote-filename")
-        (substring
-         (shell-command-to-string
-          (concat "curl --silent --upload-file "
-                  (shell-quote-argument local-filename)
-                  " " (shell-quote-argument (concat "https://transfer.sh/" remote-filename))))
-         0 -1))
-     `(lambda (transfer-link)
-        (kill-new transfer-link)
-        (message transfer-link)))))
+    (if async
+        (transfer-sh-upload-file-async local-filename remote-filename)
+      (transfer-sh-upload-file local-filename remote-filename))))
 
 (provide 'transfer-sh)
 
