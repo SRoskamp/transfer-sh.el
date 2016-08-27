@@ -48,6 +48,7 @@
   :type '(string)
   :group 'transfer-sh)
 
+;;;###autoload
 (defun transfer-sh-upload ()
   "Uploads either active region of complete buffer to transfer.sh.
 
