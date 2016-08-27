@@ -2,11 +2,7 @@
   This package provides an interface for uploading data to transfer.sh directly from within Emacs.
   
 * Installation
-  For now add the .el file to your emacs search path and add the following to your init.el:
-
-  `(require 'transfer-sh)`
-
-  I am working on getting the package into MELPA
+  The package is available in the [[http://www.melpa.org][MELPA]] repository. Alternatively, you can clone this repository.
 
 * Usage
   Usage is fairly straight-forward: Use the transfer-sh-upload function to upload 
