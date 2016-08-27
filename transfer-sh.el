@@ -48,26 +48,57 @@
   :type '(string)
   :group 'transfer-sh)
 
+(defcustom transfer-sh-gpg-args "-ac -o-"
+  "Arguments given to gpg when using transfer-sh-upload-gpg."
+  :type '(string)
+  :group 'transfer-sh)
+
+(defun transfer-sh-upload-backend (text)
+  "Backend function to upload arbitrary TEXT to transfer-sh."
+  (save-excursion
+    (let* ((buf (find-file-noselect transfer-sh-temp-file-location)))
+      (set-buffer buf)
+      (erase-buffer)
+      (princ text buf)
+      (save-buffer)
+      (kill-buffer)))
+
+  (let* ((remote-filename (concat transfer-sh-remote-prefix (buffer-name) transfer-sh-remote-suffix)))
+         (substring
+	  (shell-command-to-string
+	   (concat "curl --silent --upload-file "
+		   (shell-quote-argument transfer-sh-temp-file-location)
+		   " " (shell-quote-argument (concat "https://transfer.sh/" remote-filename))))
+	  0 -1)))
+
 ;;;###autoload
 (defun transfer-sh-upload ()
-  "Uploads either active region of complete buffer to transfer.sh.
+  "Uploads either the active region or complete buffer to transfer.sh.
 
 If a region is active, that region is exported to a file and then
 uploaded, otherwise the complete buffer is uploaded.  The remote
 file name is determined by customize-variables and the buffer
 name."
   (interactive)
-  (if (use-region-p)
-      (write-region (region-beginning) (region-end) transfer-sh-temp-file-location nil 0)
-    (write-region (point-min) (point-max) transfer-sh-temp-file-location nil 0))
+  (let* ((text (if (use-region-p) (buffer-substring-no-properties (region-beginning) (region-end)) (buffer-string)))
+    (transfer-link (transfer-sh-upload-backend text)))
+    (kill-new transfer-link)
+    (message transfer-link)))
 
-  (let* ((remote-filename (concat transfer-sh-remote-prefix (buffer-name) transfer-sh-remote-suffix))
-         (transfer-link (substring
-                         (shell-command-to-string
-			  (concat "curl --silent --upload-file "
-				  (shell-quote-argument transfer-sh-temp-file-location)
-				  " " (shell-quote-argument (concat "https://transfer.sh/" remote-filename))))
-                         0 -1)))
+;;;###autoload
+(defun transfer-sh-upload-gpg ()
+  "Uploads the active region/complete buffer to transfer.sh with gpg encryption.
+
+PASSCODE is the passphrase used for GPG encryption"
+  (interactive)
+  (let* ((text (if (use-region-p) (buffer-substring-no-properties (region-beginning) (region-end)) (buffer-string)))
+    (cipher-text (substring
+     (shell-command-to-string
+      (concat
+       "echo " (shell-quote-argument text) "|"
+       "gpg --passphrase " (shell-quote-argument (read-passwd "Passcode: ")) " " transfer-sh-gpg-args))
+     0 -1))
+    (transfer-link (transfer-sh-upload-backend cipher-text)))
     (kill-new transfer-link)
     (message transfer-link)))
 
