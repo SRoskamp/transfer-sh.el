@@ -57,19 +57,29 @@ uploaded, otherwise the complete buffer is uploaded.  The remote
 file name is determined by customize-variables and the buffer
 name."
   (interactive)
-  (if (use-region-p)
-      (write-region (region-beginning) (region-end) transfer-sh-temp-file-location nil 0)
-    (write-region (point-min) (point-max) transfer-sh-temp-file-location nil 0))
-
   (let* ((remote-filename (concat transfer-sh-remote-prefix (buffer-name) transfer-sh-remote-suffix))
-         (transfer-link (substring
-                         (shell-command-to-string
-			  (concat "curl --silent --upload-file "
-				  (shell-quote-argument transfer-sh-temp-file-location)
-				  " " (shell-quote-argument (concat "https://transfer.sh/" remote-filename))))
-                         0 -1)))
-    (kill-new transfer-link)
-    (message transfer-link)))
+         (local-filename (if (use-region-p)
+                             (progn
+                               (write-region (region-beginning) (region-end) transfer-sh-temp-file-location nil 0)
+                               transfer-sh-temp-file-location)
+                           (if (buffer-file-name)
+                               buffer-file-name
+                             (progn
+                               (write-region (point-min) (point-max) transfer-sh-temp-file-location nil 0)
+                               transfer-sh-temp-file-location)))))
+    (async-start
+     `(lambda ()
+        ,(async-inject-variables "local-filename")
+        ,(async-inject-variables "remote-filename")
+        (substring
+         (shell-command-to-string
+          (concat "curl --silent --upload-file "
+                  (shell-quote-argument local-filename)
+                  " " (shell-quote-argument (concat "https://transfer.sh/" remote-filename))))
+         0 -1))
+     `(lambda (transfer-link)
+        (kill-new transfer-link)
+        (message transfer-link)))))
 
 (provide 'transfer-sh)
 
