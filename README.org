@@ -15,3 +15,6 @@
   ;; Use this to encrypt files before uploading. It will prompt you for a passcode to pass to gpg.
   transfer-sh-upload-gpg
 #+END_SRC
+
+   When called with the universal prefix argument (C-u), the upload will be done asynchronously. This prevents emacs
+   from locking while uploading large files. This functionality requires the [[https://github.com/jwiegley/emacs-async][async.el]] package to be installed.
