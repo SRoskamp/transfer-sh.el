@@ -63,7 +63,10 @@ name."
 
   (let* ((remote-filename (concat transfer-sh-remote-prefix (buffer-name) transfer-sh-remote-suffix))
          (transfer-link (substring
-                         (shell-command-to-string (concat "curl --silent --upload-file "  transfer-sh-temp-file-location " \"https://transfer.sh/" remote-filename "\""))
+                         (shell-command-to-string
+			  (concat "curl --silent --upload-file "
+				  (shell-quote-argument transfer-sh-temp-file-location)
+				  " " (shell-quote-argument (concat "https://transfer.sh/" remote-filename))))
                          0 -1)))
     (kill-new transfer-link)
     (message transfer-link)))
