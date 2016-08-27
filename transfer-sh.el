@@ -89,7 +89,10 @@ name."
 (defun transfer-sh-upload-gpg ()
   "Uploads the active region/complete buffer to transfer.sh with gpg encryption.
 
-PASSCODE is the passphrase used for GPG encryption"
+If a region is active, that region is encrypted using the
+user-given passcode and then uploaded, otherwise the complete
+buffer is encrypted and uploaded.  The argument given to gpg can
+be modifed using the transfer-sh-gpg-args variable."
   (interactive)
   (let* ((text (if (use-region-p) (buffer-substring-no-properties (region-beginning) (region-end)) (buffer-string)))
     (cipher-text (substring
