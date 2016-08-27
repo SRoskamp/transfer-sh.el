@@ -48,6 +48,11 @@
   :type '(string)
   :group 'transfer-sh)
 
+(defcustom transfer-sh-gpg-args "-ac -o-"
+  "Arguments given to gpg when using transfer-sh-upload-gpg."
+  :type '(string)
+  :group 'transfer-sh)
+
 (defun transfer-sh-upload-backend (text)
   "Backend function to upload arbitrary TEXT to transfer-sh."
   (save-excursion
@@ -73,6 +78,22 @@ name."
   (interactive)
   (let* ((text (if (use-region-p) (buffer-substring-no-properties (region-beginning) (region-end)) (buffer-string)))
     (transfer-link (transfer-sh-upload-backend text)))
+    (kill-new transfer-link)
+    (message transfer-link)))
+
+(defun transfer-sh-upload-gpg ()
+  "Uploads the active region/complete buffer to transfer.sh with gpg encryption.
+
+PASSCODE is the passphrase used for GPG encryption"
+  (interactive)
+  (let* ((text (if (use-region-p) (buffer-substring-no-properties (region-beginning) (region-end)) (buffer-string)))
+    (cipher-text (substring
+     (shell-command-to-string
+      (concat
+       "echo " (shell-quote-argument text) "|"
+       "gpg --passphrase " (shell-quote-argument (read-passwd "Passcode: ")) " " transfer-sh-gpg-args))
+     0 -1))
+    (transfer-link (transfer-sh-upload-backend cipher-text)))
     (kill-new transfer-link)
     (message transfer-link)))
 
