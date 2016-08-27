@@ -76,7 +76,7 @@ If no REMOTE-FILENAME is given, the LOCAL-FILENAME is used."
 
 ;;;###autoload
 (defun transfer-sh-upload-file (local-filename &optional remote-filename)
-  "Uploads file LOCAL-FILENAME to transfer.sh.
+  "Upload file LOCAL-FILENAME to transfer.sh.
 
 If no REMOTE-FILENAME is given, the LOCAL-FILENAME is used."
   (interactive "ffile: ")
@@ -93,8 +93,20 @@ If no REMOTE-FILENAME is given, the LOCAL-FILENAME is used."
     (message transfer-link)))
 
 ;;;###autoload
+(defun transfer-sh-download-file (url)
+  "Download file at URL and remove HTTP response."
+  (interactive (list (read-string "URL: " "https://transfer.sh/")))
+  (let* ((download-buffer (url-retrieve-synchronously url)))
+    (with-current-buffer download-buffer
+      (goto-char (point-min))
+      (re-search-forward "^$" nil 'move)
+      (forward-char)
+      (delete-region (point-min) (point))
+      (buffer-string))))
+
+;;;###autoload
 (defun transfer-sh-upload (async)
-  "Uploads either active region of complete buffer to transfer.sh.
+  "Upload either active region of complete buffer to transfer.sh.
 
 If a region is active, that region is exported to a file and then
 uploaded, otherwise the complete buffer is uploaded.  The remote
