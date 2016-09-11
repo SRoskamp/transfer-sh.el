@@ -105,6 +105,13 @@ If no REMOTE-FILENAME is given, the LOCAL-FILENAME is used."
       (buffer-string))))
 
 ;;;###autoload
+(defun transfer-sh-download (async)
+  "Download file at URL and insert it into the kill-ring."
+  (interactive "P")
+  (kill-new  (transfer-sh-download-file (read-string "URL: " "https://transfer.sh/")))
+  (message "Transfer-sh: Download complete!"))
+
+;;;###autoload
 (defun transfer-sh-upload (async)
   "Upload either active region of complete buffer to transfer.sh.
 
