@@ -64,12 +64,10 @@ If no REMOTE-FILENAME is given, the LOCAL-FILENAME is used."
    `(lambda ()
       ,(async-inject-variables "local-filename")
       ,(async-inject-variables "remote-filename")
-      (substring
-       (shell-command-to-string
+      (shell-command-to-string
         (concat "curl --silent --upload-file "
                 (shell-quote-argument local-filename)
-                " " (shell-quote-argument (concat "https://transfer.sh/" remote-filename))))
-       0 -1))
+                " " (shell-quote-argument (concat "https://transfer.sh/" remote-filename)))))
    `(lambda (transfer-link)
       (kill-new transfer-link)
       (message transfer-link))))
@@ -83,12 +81,10 @@ If no REMOTE-FILENAME is given, the LOCAL-FILENAME is used."
   (let*  ((remote-filename (if remote-filename
                                remote-filename
                              (file-name-nondirectory local-filename)))
-          (transfer-link (substring
-                          (shell-command-to-string
+          (transfer-link (shell-command-to-string
                            (concat "curl --silent --upload-file "
                                    (shell-quote-argument local-filename)
-                                   " " (shell-quote-argument (concat "https://transfer.sh/" remote-filename))))
-                          0 -1)))
+                                   " " (shell-quote-argument (concat "https://transfer.sh/" remote-filename))))))
     (kill-new transfer-link)
     (message transfer-link)))
 
