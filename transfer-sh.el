@@ -74,22 +74,20 @@
   :group 'transfer-sh)
 
 ;;;###autoload
-(defun transfer-sh-upload-file-async (local-filename &optional remote-filename)
+(defun transfer-sh-upload-file-async (local-filename)
   "Uploads file LOCAL-FILENAME to transfer.sh in background.
 
-If no REMOTE-FILENAME is given, the LOCAL-FILENAME is used."
+Read from minibuffer the remote file name visible in the transfer.sh link and run `transfer-sh-run-upload-agent'."
   (interactive "ffile: ")
-  (async-start
-   `(lambda ()
-      ,(async-inject-variables "local-filename")
-      ,(async-inject-variables "remote-filename")
-      (shell-command-to-string
-        (concat "curl --silent --upload-file "
-                (shell-quote-argument local-filename)
-                " " (shell-quote-argument (concat "https://transfer.sh/" remote-filename)))))
-   `(lambda (transfer-link)
-      (kill-new transfer-link)
-      (message transfer-link))))
+  (let* ((remote-filename (read-from-minibuffer
+			   (format "Remote filename (default %s): "
+				   (file-name-nondirectory local-filename))
+			   (file-name-nondirectory local-filename))))
+    (async-start
+     `(lambda ()
+	,(async-inject-variables "local-filename")
+	,(async-inject-variables "remote-filename")
+	,(transfer-sh-run-upload-agent local-filename remote-filename)))))
 
 ;;;###autoload
 (defun transfer-sh-upload-file (local-filename)
