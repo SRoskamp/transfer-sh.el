@@ -92,18 +92,16 @@ If no REMOTE-FILENAME is given, the LOCAL-FILENAME is used."
       (message transfer-link))))
 
 ;;;###autoload
-(defun transfer-sh-upload-file (local-filename &optional remote-filename)
+(defun transfer-sh-upload-file (local-filename)
   "Uploads file LOCAL-FILENAME to transfer.sh.
 
-If no REMOTE-FILENAME is given, the LOCAL-FILENAME is used."
+Read from minibuffer the remote file name visible in the transfer.sh link and run `transfer-sh-run-upload-agent'."
   (interactive "ffile: ")
-  (let*  ((remote-filename (if remote-filename
-                               remote-filename
-                             (file-name-nondirectory local-filename)))
-          (transfer-link (shell-command-to-string
-                           (concat "curl --silent --upload-file "
-                                   (shell-quote-argument local-filename)
-                                   " " (shell-quote-argument (concat "https://transfer.sh/" remote-filename))))))
+  (transfer-sh-run-upload-agent local-filename (read-from-minibuffer
+						(format "Remote filename (default %s): "
+							(file-name-nondirectory local-filename))
+						(file-name-nondirectory local-filename))))
+
 (defun transfer-sh-run-upload-agent (local-filename  &optional remote-filename)
   "Uploads LOCAL-FILENAME to transfer.sh using `transfer-sh-upload-agent-command'.
 
