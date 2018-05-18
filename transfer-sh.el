@@ -54,6 +54,25 @@
   :type '(string)
   :group 'transfer-sh)
 
+(defcustom transfer-sh-upload-agent-command
+  (cond
+   ((executable-find "curl")
+    "curl")
+   ((executable-find "wget")
+    "wget"))
+  "Command used to upload files to transfer.sh"
+  :type '(string)
+  :group 'transfer-sh)
+
+(defcustom transfer-sh-upload-agent-arguments
+  (cond
+   ((executable-find "curl")
+    (list "--silent" "--upload-file"))
+   ((executable-find "wget")
+    (list "--method" "PUT" "--output-document" "-"  "--no-verbose" "--quiet" "--body-file")))
+  "Suffix arguments to `transfer-sh-upload-agent-command'"
+  :group 'transfer-sh)
+
 ;;;###autoload
 (defun transfer-sh-upload-file-async (local-filename &optional remote-filename)
   "Uploads file LOCAL-FILENAME to transfer.sh in background.
