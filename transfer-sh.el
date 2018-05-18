@@ -104,8 +104,23 @@ If no REMOTE-FILENAME is given, the LOCAL-FILENAME is used."
                            (concat "curl --silent --upload-file "
                                    (shell-quote-argument local-filename)
                                    " " (shell-quote-argument (concat "https://transfer.sh/" remote-filename))))))
+(defun transfer-sh-run-upload-agent (local-filename  &optional remote-filename)
+  "Uploads LOCAL-FILENAME to transfer.sh using `transfer-sh-upload-agent-command'.
+
+If no REMOTE-FILE is given, LOCAL-FILENAME is used."
+  (let* ((filename-without-directory (file-name-nondirectory local-filename))
+	 (remote-filename (if remote-filename
+			      remote-filename
+			    filename-without-directory))
+	 (transfer-link (with-temp-buffer (apply 'call-process
+						 transfer-sh-upload-agent-command
+						 nil t nil
+						 (append transfer-sh-upload-agent-arguments
+							 (list local-filename
+							       (concat "https://transfer.sh/" remote-filename))))
+					  (buffer-string))))
     (kill-new transfer-link)
-    (message transfer-link)))
+    (message (concat "File '" filename-without-directory "' uploaded: " transfer-link))))
 
 ;;;###autoload
 (defun transfer-sh-upload (async)
