@@ -139,8 +139,8 @@ the buffer name."
                                (write-region (point-min) (point-max) transfer-sh-temp-file-location nil 0)
                                transfer-sh-temp-file-location)))))
     (if async
-        (transfer-sh-upload-file-async local-filename remote-filename)
-      (transfer-sh-upload-file local-filename remote-filename))))
+        (transfer-sh-upload-file-async local-filename)
+      (transfer-sh-upload-file local-filename))))
 
 ;;;###autoload
 (defun transfer-sh-upload-gpg (async)
