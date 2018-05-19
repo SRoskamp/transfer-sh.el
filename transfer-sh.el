@@ -74,49 +74,56 @@
   :group 'transfer-sh)
 
 ;;;###autoload
-(defun transfer-sh-upload-file-async (local-filename)
-  "Uploads file LOCAL-FILENAME to transfer.sh in background.
+(defun transfer-sh-upload-file-async (local-filename &optional remote-filename)
+  "Upload file LOCAL-FILENAME to transfer.sh in background.
 
-Read from minibuffer the remote file name visible in the transfer.sh link and run `transfer-sh-run-upload-agent'."
+If no REMOTE-FILENAME is provided, read from minibuffer the
+remote file name visible in the transfer.sh link and run
+`transfer-sh-run-upload-agent'."
   (interactive "ffile: ")
-  (let* ((remote-filename (read-from-minibuffer
-			   (format "Remote filename (default %s): "
-				   (file-name-nondirectory local-filename))
-			   (file-name-nondirectory local-filename))))
-    (async-start
-     `(lambda ()
-	,(async-inject-variables "local-filename")
-	,(async-inject-variables "remote-filename")
-	,(transfer-sh-run-upload-agent local-filename remote-filename)))))
+  (or remote-filename
+      (setq remote-filename (read-from-minibuffer
+                             (format "Remote filename (default %s): "
+                                     (file-name-nondirectory local-filename))
+                             (file-name-nondirectory local-filename))))
+  (async-start
+   `(lambda ()
+      ,(async-inject-variables "local-filename")
+      ,(async-inject-variables "remote-filename")
+      ,(transfer-sh-run-upload-agent local-filename remote-filename))))
 
 ;;;###autoload
-(defun transfer-sh-upload-file (local-filename)
+(defun transfer-sh-upload-file (local-filename &optional remote-filename)
   "Uploads file LOCAL-FILENAME to transfer.sh.
 
-Read from minibuffer the remote file name visible in the transfer.sh link and run `transfer-sh-run-upload-agent'."
+If no REMOTE-FILENAME is provided, read from minibuffer the
+remote file name visible in the transfer.sh link and run
+`transfer-sh-run-upload-agent'."
   (interactive "ffile: ")
-  (transfer-sh-run-upload-agent local-filename (read-from-minibuffer
-						(format "Remote filename (default %s): "
-							(file-name-nondirectory local-filename))
-						(file-name-nondirectory local-filename))))
+  (transfer-sh-run-upload-agent
+   local-filename
+   (or remote-filename
+       (read-from-minibuffer
+        (format "Remote filename (default %s): "
+                (file-name-nondirectory local-filename))
+        (file-name-nondirectory local-filename)))))
 
 (defun transfer-sh-run-upload-agent (local-filename  &optional remote-filename)
   "Uploads LOCAL-FILENAME to transfer.sh using `transfer-sh-upload-agent-command'.
 
 If no REMOTE-FILE is given, LOCAL-FILENAME is used."
   (let* ((filename-without-directory (file-name-nondirectory local-filename))
-	 (remote-filename (if remote-filename
-			      remote-filename
-			    filename-without-directory))
-	 (transfer-link (with-temp-buffer (apply 'call-process
-						 transfer-sh-upload-agent-command
-						 nil t nil
-						 (append transfer-sh-upload-agent-arguments
-							 (list local-filename
-							       (concat "https://transfer.sh/" remote-filename))))
-					  (buffer-string))))
+         (remote-filename (or remote-filename filename-without-directory))
+         (transfer-link (with-temp-buffer
+                          (apply 'call-process
+                                 transfer-sh-upload-agent-command
+                                 nil t nil
+                                 (append transfer-sh-upload-agent-arguments
+                                         (list local-filename
+                                               (concat "https://transfer.sh/" remote-filename))))
+                          (buffer-string))))
     (kill-new transfer-link)
-    (message (concat "File '" filename-without-directory "' uploaded: " transfer-link))))
+    (minibuffer-message "File %S uploaded: %s" filename-without-directory transfer-link)))
 
 ;;;###autoload
 (defun transfer-sh-upload (async)
