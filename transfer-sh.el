@@ -74,6 +74,14 @@
   :type '(repeat string)
   :group 'transfer-sh)
 
+(defvar transfer-sh-gpg-keys-hash-table nil
+  "Hash table storing the available public gpg keys from the keyring.
+
+Can be updated by calling function `transfer-sh-refresh-gpg-keys'.")
+
+(defvar transfer-sh-gpg-key-reference-separator " - "
+  "Separator used in the reference name of all GPG keys.")
+
 ;;;###autoload
 (defun transfer-sh-upload-file-async (local-filename &optional remote-filename)
   "Upload file LOCAL-FILENAME to transfer.sh in background.
@@ -181,6 +189,44 @@ be modifed using the transfer-sh-gpg-args variable."
     (if async
 	(transfer-sh-upload-file-async transfer-sh-temp-file-location remote-filename)
       (transfer-sh-upload-file transfer-sh-temp-file-location remote-filename))))
+;;;###autoload
+(defun transfer-sh-refresh-gpg-keys ()
+  "Generate a hash table containing all gpg keys in the king ring.
+
+Each hash table entry is referred by 'name - email - fingerprint', see"
+  (interactive)
+  (if transfer-sh-gpg-keys-hash-table
+      (clrhash transfer-sh-gpg-keys-hash-table)
+    (setq transfer-sh-gpg-keys-hash-table (make-hash-table
+                                           :test 'equal)))
+  (let ((keys (epg-list-keys
+               (epg-make-context epa-protocol))))
+    (dolist (key keys)
+      (puthash
+       (transfer-sh-create-gpg-key-reference key)
+       key
+       transfer-sh-gpg-keys-hash-table))))
+
+(defun transfer-sh-create-gpg-key-reference (key)
+  "Create a reference name for the gpg key KEY.
+
+Return a string that contains the name, email and fingerprint of KEY.
+Spearator between each field is controlled by `transfer-sh-gpg-key-reference-separator'."
+  (require 'rx)
+  (let* ((user-id (split-string
+                   (epg-user-id-string (car (epg-key-user-id-list key)))
+                   (rx (or " <" ">"))
+                   t))
+         (name (car user-id))
+         (email (nth 1 user-id))
+         (fingerprint (epg-sub-key-id (car (epg-key-sub-key-list key)))))
+    (concat
+     name
+     transfer-sh-gpg-key-reference-separator
+     email
+     transfer-sh-gpg-key-reference-separator
+     fingerprint)))
+
 
 (provide 'transfer-sh)
 
