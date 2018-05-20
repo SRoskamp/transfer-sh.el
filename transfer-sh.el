@@ -135,6 +135,12 @@ If no REMOTE-FILE is given, LOCAL-FILENAME is used."
 
 ;;;###autoload
 (defun transfer-sh-upload (async)
+  "Allias for `tranfer-sh-upload-region'."
+  (interactive "P")
+  (transfer-sh-upload-region async))
+
+;;;###autoload
+(defun transfer-sh-upload-region (async)
   "Upload either active region or complete buffer to transfer.sh.
 
 If a region is active, that region is exported to a file and then
