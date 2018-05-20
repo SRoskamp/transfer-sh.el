@@ -190,6 +190,46 @@ be modifed using the transfer-sh-gpg-args variable."
 	(transfer-sh-upload-file-async transfer-sh-temp-file-location remote-filename)
       (transfer-sh-upload-file transfer-sh-temp-file-location remote-filename))))
 ;;;###autoload
+(defun transfer-sh-encrypt-upload-file (local-filename)
+  "Encrypt LOCAL-FILENAME using gpg and upload file to transfer.sh.
+
+Ask for the GPG keys to use for encryption. If no key is
+selected, then gpg will use symetric encryption and asks for a
+passcode.
+
+The encrypted file is stored in `temporary-file-directory' and uploaded to
+transfer.sh using `transfer-sh-run-upload-agent'."
+  (interactive "ffile: ")
+  (or transfer-sh-gpg-keys-hash-table
+      (transfer-sh-refresh-gpg-keys))
+  (let* ((remote-filename (read-from-minibuffer
+                           (format "Remote filename (default %s): "
+                                   (concat
+                                    (file-name-nondirectory local-filename)
+                                    ".gpg"))
+                           (concat
+                            (file-name-nondirectory local-filename)
+                            ".gpg")))
+         (file-to-be-uploaded (make-temp-file remote-filename))
+         (selected-keys (completing-read-multiple
+                         "GPG keys (default is symetric encryption. Press <tab> for completion): "
+                         transfer-sh-gpg-keys-hash-table))
+         (all-pgp-keys (epg-list-keys
+                        (epg-make-context epa-protocol))))
+    (condition-case
+        epg-encryption-error
+        (epg-encrypt-file (epg-make-context epa-protocol)
+                          local-filename
+                          (mapcar
+                           (lambda(reference)
+                             (gethash reference transfer-sh-gpg-keys-hash-table))
+                           selected-keys)
+                          file-to-be-uploaded)
+      (epg-error
+       (user-error "GPG-error: %s" (cdr epg-encryption-error))))
+    (transfer-sh-run-upload-agent file-to-be-uploaded remote-filename)))
+
+;;;###autoload
 (defun transfer-sh-refresh-gpg-keys ()
   "Generate a hash table containing all gpg keys in the king ring.
 
