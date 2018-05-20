@@ -78,9 +78,10 @@
 (defun transfer-sh-upload-file-async (local-filename &optional remote-filename)
   "Upload file LOCAL-FILENAME to transfer.sh in background.
 
-If no REMOTE-FILENAME is provided, read from minibuffer the
-remote file name visible in the transfer.sh link and run
-`transfer-sh-run-upload-agent'."
+REMOTE-FILENAME is the name used in the transfer.sh link. If not
+provided, query the user.
+
+This function uses `transfer-sh-run-upload-agent'."
   (interactive "ffile: ")
   (or remote-filename
       (setq remote-filename (read-from-minibuffer
@@ -97,9 +98,10 @@ remote file name visible in the transfer.sh link and run
 (defun transfer-sh-upload-file (local-filename &optional remote-filename)
   "Uploads file LOCAL-FILENAME to transfer.sh.
 
-If no REMOTE-FILENAME is provided, read from minibuffer the
-remote file name visible in the transfer.sh link and run
-`transfer-sh-run-upload-agent'."
+REMOTE-FILENAME is the name used in the transfer.sh link. If not
+provided, query the user.
+
+This function uses `transfer-sh-run-upload-agent'."
   (interactive "ffile: ")
   (transfer-sh-run-upload-agent
    local-filename
@@ -110,7 +112,7 @@ remote file name visible in the transfer.sh link and run
         (file-name-nondirectory local-filename)))))
 
 (defun transfer-sh-run-upload-agent (local-filename  &optional remote-filename)
-  "Uploads LOCAL-FILENAME to transfer.sh using `transfer-sh-upload-agent-command'.
+  "Upload LOCAL-FILENAME to transfer.sh using `transfer-sh-upload-agent-command'.
 
 If no REMOTE-FILE is given, LOCAL-FILENAME is used."
   (let* ((filename-without-directory (file-name-nondirectory local-filename))
@@ -128,13 +130,13 @@ If no REMOTE-FILE is given, LOCAL-FILENAME is used."
 
 ;;;###autoload
 (defun transfer-sh-upload (async)
-  "Uploads either active region or complete buffer to transfer.sh.
+  "Upload either active region or complete buffer to transfer.sh.
 
 If a region is active, that region is exported to a file and then
-uploaded, otherwise the complete buffer is uploaded.  The remote
-file name is determined by the custom variables
-`transfer-sh-remote-prefix' and `transfer-sh-remote-suffix', and
-the buffer name."
+uploaded, otherwise the complete buffer is uploaded.
+
+This function uses `transfer-sh-upload-file' and
+`transfer-sh-upload-file-async'."
   (interactive "P")
   (let* ((remote-filename (concat transfer-sh-remote-prefix (buffer-name) transfer-sh-remote-suffix))
          (local-filename (if (use-region-p)
