@@ -121,7 +121,7 @@ This function uses `transfer-sh-run-upload-agent'."
                  (file-name-nondirectory local-filename))
          (file-name-nondirectory local-filename))))))
 
-(defun transfer-sh-run-upload-agent (local-filename  &optional remote-filename)
+(defun transfer-sh-run-upload-agent (local-filename &optional remote-filename)
   "Upload LOCAL-FILENAME to transfer.sh using `transfer-sh-upload-agent-command'.
 
 If no REMOTE-FILE is given, LOCAL-FILENAME is used."
@@ -203,7 +203,7 @@ uploaded to transfer.sh using `transfer-sh-run-upload-agent'."
                                   text
                                   (and selected-keys
                                        (mapcar
-                                        (lambda(reference)
+                                        (lambda (reference)
                                           (gethash reference transfer-sh-gpg-keys-hash-table))
                                         selected-keys)))
             (epg-error
@@ -259,7 +259,7 @@ transfer.sh using `transfer-sh-run-upload-agent'."
         (epg-encrypt-file (epg-make-context epa-protocol)
                           local-filename
                           (mapcar
-                           (lambda(reference)
+                           (lambda (reference)
                              (gethash reference transfer-sh-gpg-keys-hash-table))
                            selected-keys)
                           file-to-be-uploaded)
