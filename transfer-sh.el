@@ -84,10 +84,11 @@ provided, query the user.
 This function uses `transfer-sh-run-upload-agent'."
   (interactive "ffile: ")
   (or remote-filename
-      (setq remote-filename (read-from-minibuffer
-                             (format "Remote filename (default %s): "
-                                     (file-name-nondirectory local-filename))
-                             (file-name-nondirectory local-filename))))
+      (setq remote-filename (url-encode-url
+                             (read-from-minibuffer
+                              (format "Remote filename (default %s): "
+                                      (file-name-nondirectory local-filename))
+                              (file-name-nondirectory local-filename)))))
   (async-start
    `(lambda ()
       ,(async-inject-variables "local-filename")
@@ -106,10 +107,11 @@ This function uses `transfer-sh-run-upload-agent'."
   (transfer-sh-run-upload-agent
    local-filename
    (or remote-filename
-       (read-from-minibuffer
-        (format "Remote filename (default %s): "
-                (file-name-nondirectory local-filename))
-        (file-name-nondirectory local-filename)))))
+       (url-encode-url
+        (read-from-minibuffer
+         (format "Remote filename (default %s): "
+                 (file-name-nondirectory local-filename))
+         (file-name-nondirectory local-filename))))))
 
 (defun transfer-sh-run-upload-agent (local-filename  &optional remote-filename)
   "Upload LOCAL-FILENAME to transfer.sh using `transfer-sh-upload-agent-command'.
