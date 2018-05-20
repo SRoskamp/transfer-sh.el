@@ -49,11 +49,6 @@
   :type 'string
   :group 'transfer-sh)
 
-(defcustom transfer-sh-gpg-args "-ac -o-"
-  "Arguments given to gpg when using transfer-sh-upload-gpg."
-  :type 'string
-  :group 'transfer-sh)
-
 (defcustom transfer-sh-upload-agent-command
   (cond
    ((executable-find "curl")
