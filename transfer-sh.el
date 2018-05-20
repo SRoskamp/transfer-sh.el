@@ -148,15 +148,24 @@ uploaded, otherwise the complete buffer is uploaded.
 This function uses `transfer-sh-upload-file' and
 `transfer-sh-upload-file-async'."
   (interactive "P")
-  (let* ((remote-filename (concat transfer-sh-remote-prefix (buffer-name) transfer-sh-remote-suffix))
+  (let* ((remote-filename (concat
+                           transfer-sh-remote-prefix
+                           (buffer-name)
+                           transfer-sh-remote-suffix))
          (local-filename (if (use-region-p)
                              (progn
-                               (write-region (region-beginning) (region-end) transfer-sh-temp-file-location nil 0)
+                               (write-region
+                                (region-beginning)
+                                (region-end)
+                                transfer-sh-temp-file-location nil 0)
                                transfer-sh-temp-file-location)
                            (if (buffer-file-name)
                                buffer-file-name
                              (progn
-                               (write-region (point-min) (point-max) transfer-sh-temp-file-location nil 0)
+                               (write-region
+                                (point-min)
+                                (point-max)
+                                transfer-sh-temp-file-location nil 0)
                                transfer-sh-temp-file-location)))))
     (if async
         (transfer-sh-upload-file-async local-filename)
