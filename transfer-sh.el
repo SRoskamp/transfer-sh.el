@@ -36,22 +36,22 @@
 
 (defcustom transfer-sh-temp-file-location "/tmp/transfer-sh.tmp"
   "The temporary file to use for uploading to transfer.sh."
-  :type '(string)
+  :type 'string
   :group 'transfer-sh)
 
 (defcustom transfer-sh-remote-prefix nil
   "A prefix added to each remote file name."
-  :type '(string)
+  :type 'string
   :group 'transfer-sh)
 
 (defcustom transfer-sh-remote-suffix nil
   "A suffix added to each remote file name."
-  :type '(string)
+  :type 'string
   :group 'transfer-sh)
 
 (defcustom transfer-sh-gpg-args "-ac -o-"
   "Arguments given to gpg when using transfer-sh-upload-gpg."
-  :type '(string)
+  :type 'string
   :group 'transfer-sh)
 
 (defcustom transfer-sh-upload-agent-command
@@ -61,7 +61,7 @@
    ((executable-find "wget")
     "wget"))
   "Command used to upload files to transfer.sh"
-  :type '(string)
+  :type 'string
   :group 'transfer-sh)
 
 (defcustom transfer-sh-upload-agent-arguments
@@ -71,6 +71,7 @@
    ((executable-find "wget")
     (list "--method" "PUT" "--output-document" "-"  "--no-verbose" "--quiet" "--body-file")))
   "Suffix arguments to `transfer-sh-upload-agent-command'"
+  :type '(repeat string)
   :group 'transfer-sh)
 
 ;;;###autoload
