@@ -167,6 +167,12 @@ This function uses `transfer-sh-upload-file' and
 
 ;;;###autoload
 (defun transfer-sh-upload-gpg (async)
+  "Allias for `tranfer-sh-encrypt-upload-region'."
+  (interactive "P")
+  (transfer-sh-encrypt-upload-region async))
+
+;;;###autoload
+(defun transfer-sh-encrypt-upload-region (async)
   "Encrypt and upload the active region/complete buffer to transfer.sh.
 
 If a region is active, that region is encrypted using the
