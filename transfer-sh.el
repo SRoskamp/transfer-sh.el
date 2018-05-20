@@ -164,31 +164,60 @@ This function uses `transfer-sh-upload-file' and
 
 ;;;###autoload
 (defun transfer-sh-upload-gpg (async)
-  "Uploads the active region/complete buffer to transfer.sh with gpg encryption.
+  "Encrypt and upload the active region/complete buffer to transfer.sh.
 
 If a region is active, that region is encrypted using the
 user-given passcode and then uploaded, otherwise the complete
-buffer is encrypted and uploaded.  The argument given to gpg can
-be modifed using the transfer-sh-gpg-args variable."
+buffer is encrypted and uploaded.
+
+Ask for the GPG keys to use for encryption. If no key is
+selected, then gpg will use symetric encryption and asks for a
+passcode.
+
+The encrypted file is stored in `temporary-file-directory' and
+uploaded to transfer.sh using `transfer-sh-run-upload-agent'."
   (interactive "P")
-  (let* ((text (if (use-region-p) (buffer-substring-no-properties (region-beginning) (region-end)) (buffer-string)))
-    (cipher-text (substring
-     (shell-command-to-string
-      (concat
-       "echo " (shell-quote-argument text) "|"
-       "gpg --passphrase " (shell-quote-argument (read-passwd "Passcode: ")) " " transfer-sh-gpg-args))
-     0 -1))
-    (remote-filename (concat transfer-sh-remote-prefix (buffer-name) transfer-sh-remote-suffix)))
-    (save-excursion
-      (let* ((buf (find-file-noselect transfer-sh-temp-file-location)))
-	(set-buffer buf)
-	(erase-buffer)
-	(princ cipher-text buf)
-	(save-buffer)
-	(kill-buffer)))
-    (if async
-	(transfer-sh-upload-file-async transfer-sh-temp-file-location remote-filename)
-      (transfer-sh-upload-file transfer-sh-temp-file-location remote-filename))))
+  (or transfer-sh-gpg-keys-hash-table
+      (transfer-sh-refresh-gpg-keys))
+  (let* ((text (if (use-region-p)
+                   (buffer-substring-no-properties (region-beginning)
+                                                   (region-end))
+                 (buffer-substring-no-properties (point-min)
+                                                 (point-max))))
+         (selected-keys (completing-read-multiple
+                         "GPG keys (default is symetric encryption. Press <tab> for completion): "
+                         transfer-sh-gpg-keys-hash-table))
+         (cipher-text
+          (condition-case
+              epg-encryption-error
+              (epg-encrypt-string (epg-context--make epa-protocol)
+                                  text
+                                  (and selected-keys
+                                       (mapcar
+                                        (lambda(reference)
+                                          (gethash reference transfer-sh-gpg-keys-hash-table))
+                                        selected-keys)))
+            (epg-error
+             (user-error "GPG-error: %s" (cdr epg-encryption-error)))))
+         (default-filename (concat (buffer-name)
+                                   ".gpg"))
+         (remote-filename (read-from-minibuffer
+                           (format "Remote filename (default %s): "
+                                   default-filename)
+                           default-filename))
+         (file-to-be-uploaded (make-temp-file remote-filename)))
+    (with-temp-buffer
+      (insert cipher-text)
+      (let ((buffer-file-coding-system 'no-conversion))
+        (write-region (point-min)
+                      (point-max)
+                      file-to-be-uploaded)))
+    (funcall (if async
+                 'transfer-sh-upload-file-async
+               'transfer-sh-upload-file)
+             file-to-be-uploaded
+             remote-filename)))
+
 ;;;###autoload
 (defun transfer-sh-encrypt-upload-file (local-filename)
   "Encrypt LOCAL-FILENAME using gpg and upload file to transfer.sh.
