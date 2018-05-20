@@ -245,9 +245,7 @@ transfer.sh using `transfer-sh-run-upload-agent'."
          (file-to-be-uploaded (make-temp-file remote-filename))
          (selected-keys (completing-read-multiple
                          "GPG keys (default is symetric encryption. Press <tab> for completion): "
-                         transfer-sh-gpg-keys-hash-table))
-         (all-pgp-keys (epg-list-keys
-                        (epg-make-context epa-protocol))))
+                         transfer-sh-gpg-keys-hash-table)))
     (condition-case
         epg-encryption-error
         (epg-encrypt-file (epg-make-context epa-protocol)
