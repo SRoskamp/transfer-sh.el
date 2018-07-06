@@ -134,10 +134,7 @@ If no REMOTE-FILE is given, LOCAL-FILENAME is used."
     (minibuffer-message "File %S uploaded: %s" filename-without-directory transfer-link)))
 
 ;;;###autoload
-(defun transfer-sh-upload (async)
-  "Allias for `tranfer-sh-upload-region'."
-  (interactive "P")
-  (transfer-sh-upload-region async))
+(defalias 'transfer-sh-upload 'transfer-sh-upload-region)
 
 ;;;###autoload
 (defun transfer-sh-upload-region (async)
@@ -172,10 +169,7 @@ This function uses `transfer-sh-upload-file' and
              local-filename)))
 
 ;;;###autoload
-(defun transfer-sh-upload-gpg (async)
-  "Allias for `tranfer-sh-encrypt-upload-region'."
-  (interactive "P")
-  (transfer-sh-encrypt-upload-region async))
+(defalias 'transfer-sh-upload-gpg 'transfer-sh-encrypt-upload-region)
 
 ;;;###autoload
 (defun transfer-sh-encrypt-upload-region (async)
