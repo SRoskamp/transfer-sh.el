@@ -81,7 +81,7 @@ Can be updated by calling function `transfer-sh-refresh-gpg-keys'.")
 (defun transfer-sh-upload-file-async (local-filename &optional remote-filename)
   "Upload file LOCAL-FILENAME to transfer.sh in background.
 
-REMOTE-FILENAME is the name used in the transfer.sh link. If not
+REMOTE-FILENAME is the name used in the transfer.sh link.  If not
 provided, query the user.
 
 This function uses `transfer-sh-run-upload-agent'."
@@ -102,7 +102,7 @@ This function uses `transfer-sh-run-upload-agent'."
 (defun transfer-sh-upload-file (local-filename &optional remote-filename)
   "Uploads file LOCAL-FILENAME to transfer.sh.
 
-REMOTE-FILENAME is the name used in the transfer.sh link. If not
+REMOTE-FILENAME is the name used in the transfer.sh link.  If not
 provided, query the user.
 
 This function uses `transfer-sh-run-upload-agent'."
@@ -178,22 +178,22 @@ This function uses `transfer-sh-upload-file' and
 If a region is active, use that region, otherwise the complete
 buffer.
 
-Query user for the GPG key(s) to use for encryption. If no key is
+Query user for the GPG key(s) to use for encryption.  If no key is
 selected by user, then use symmetric encryption (and ask for a
 symmetric passphrase).
 
 The encrypted file is stored in `temporary-file-directory' and
 uploaded to transfer.sh using `transfer-sh-run-upload-agent'."
   (interactive "P")
-  (or transfer-sh-gpg-keys-hash-table
-      (transfer-sh-refresh-gpg-keys))
+  (unless transfer-sh-gpg-keys-hash-table
+    (transfer-sh-refresh-gpg-keys))
   (let* ((text (if (use-region-p)
                    (buffer-substring-no-properties (region-beginning)
                                                    (region-end))
                  (buffer-substring-no-properties (point-min)
                                                  (point-max))))
          (selected-keys (completing-read-multiple
-                         "GPG keys (default is symetric encryption. Press <tab> for completion): "
+                         "GPG keys (default is symetric encryption).\nPress <tab> for completion: "
                          transfer-sh-gpg-keys-hash-table))
          (cipher-text
           (condition-case
@@ -230,15 +230,15 @@ uploaded to transfer.sh using `transfer-sh-run-upload-agent'."
 (defun transfer-sh-encrypt-upload-file (local-filename)
   "Encrypt LOCAL-FILENAME using gpg and upload file to transfer.sh.
 
-Query user for the GPG key(s) to use for encryption. If no key is
+Query user for the GPG key(s) to use for encryption.  If no key is
 selected by user, then use symmetric encryption (and ask for a
 symmetric passphrase).
 
 The encrypted file is stored in `temporary-file-directory' and uploaded to
 transfer.sh using `transfer-sh-run-upload-agent'."
   (interactive "ffile: ")
-  (or transfer-sh-gpg-keys-hash-table
-      (transfer-sh-refresh-gpg-keys))
+  (unless transfer-sh-gpg-keys-hash-table
+    (transfer-sh-refresh-gpg-keys))
   (let* ((remote-filename (read-from-minibuffer
                            (format "Remote filename (default %s): "
                                    (concat
@@ -249,7 +249,7 @@ transfer.sh using `transfer-sh-run-upload-agent'."
                             ".gpg")))
          (file-to-be-uploaded (make-temp-file remote-filename))
          (selected-keys (completing-read-multiple
-                         "GPG keys (default is symetric encryption. Press <tab> for completion): "
+                         "GPG keys (default is symetric encryption.\nPress <tab> for completion): "
                          transfer-sh-gpg-keys-hash-table)))
     (condition-case
         epg-encryption-error
