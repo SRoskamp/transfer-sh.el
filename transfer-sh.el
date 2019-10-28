@@ -32,6 +32,9 @@
 ;; buffer name and the prefix/suffix variables.
 
 ;;; Code:
+
+(require 'epa)
+
 (defgroup transfer-sh nil
   "Interface to transfer.sh uploading service."
   :group 'external)
