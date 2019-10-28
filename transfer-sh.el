@@ -158,27 +158,28 @@ synchronously.  Else, upload the region asynchronously.
 This function uses `transfer-sh-upload-file' and
 `transfer-sh-upload-file-async'."
   (interactive "P")
-  (let* ((remote-filename (concat
-                           transfer-sh-remote-prefix
-                           (buffer-name)
-                           transfer-sh-remote-suffix))
-         (local-filename (if (use-region-p)
-                             (progn
-                               (write-region
-                                (region-beginning)
-                                (region-end)
-                                transfer-sh-temp-file-location nil 0)
-                               transfer-sh-temp-file-location)
-                           (or buffer-file-name
-                               (write-region
-                                (point-min)
-                                (point-max)
-                                transfer-sh-temp-file-location nil 0)
-                               transfer-sh-temp-file-location))))
+  (let ((remote-filename (concat
+                          transfer-sh-remote-prefix
+                          (buffer-name)
+                          transfer-sh-remote-suffix))
+        (local-filename (if (use-region-p)
+                            (progn
+                              (write-region
+                               (region-beginning)
+                               (region-end)
+                               transfer-sh-temp-file-location nil 0)
+                              transfer-sh-temp-file-location)
+                          (or buffer-file-name
+                              (write-region
+                               (point-min)
+                               (point-max)
+                               transfer-sh-temp-file-location nil 0)
+                              transfer-sh-temp-file-location))))
     (funcall (if async
                  'transfer-sh-upload-file-async
                'transfer-sh-upload-file)
-             local-filename)))
+             local-filename
+             remote-filename)))
 
 ;;;###autoload
 (defalias 'transfer-sh-upload-gpg 'transfer-sh-encrypt-upload-region)
