@@ -1,10 +1,12 @@
-;;; transfer-sh.el --- Simple interface for sending buffer contents to transfer.sh
+;;; transfer-sh.el --- Simple interface for sending buffer contents to transfer.sh -*- lexical-binding: t -*-
 
-;; Copyright (C) 2016 Steffen Roskamp
+;; Copyright (C) 2016 Steffen Roskamp, Arnaud Hoffmann
 
-;; Author: S. Roskamp <steffen.roskamp@gmail.com>
-;; Keywords: cloud, upload, share
-;; Package-Requires: ((async "1.0"))
+;; Authors: S. Roskamp <steffen.roskamp@gmail.com>, A. Hoffmann <tuedachu@gmail.com>
+;; Version: 2.1
+;; URL: https://github.com/SRoskamp.transfer-sh.el
+;; Keywords: comm, convenience, files
+;; Package-Requires: ((emacs "25.1") (async "1.0"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
