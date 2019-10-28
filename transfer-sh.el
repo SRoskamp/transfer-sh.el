@@ -60,7 +60,7 @@
     "curl")
    ((executable-find "wget")
     "wget"))
-  "Command used to upload files to transfer.sh"
+  "Command used to upload files to transfer.sh."
   :type 'string
   :group 'transfer-sh)
 
@@ -70,7 +70,7 @@
     (list "--silent" "--upload-file"))
    ((executable-find "wget")
     (list "--method" "PUT" "--output-document" "-"  "--no-verbose" "--quiet" "--body-file")))
-  "Suffix arguments to `transfer-sh-upload-agent-command'"
+  "Suffix arguments to `transfer-sh-upload-agent-command'."
   :type '(repeat string)
   :group 'transfer-sh)
 
@@ -122,9 +122,13 @@ This function uses `transfer-sh-run-upload-agent'."
          (file-name-nondirectory local-filename))))))
 
 (defun transfer-sh-run-upload-agent (local-filename &optional remote-filename)
-  "Upload LOCAL-FILENAME to transfer.sh using `transfer-sh-upload-agent-command'.
+  "Upload LOCAL-FILENAME to transfer.sh.
 
-If no REMOTE-FILE is given, LOCAL-FILENAME is used."
+If optional arguement REMOTE-FILENAME is not given,
+LOCAL-FILENAME is used.
+
+Use `transfer-sh-upload-agent-command'"
+
   (let* ((filename-without-directory (file-name-nondirectory local-filename))
          (remote-filename (or remote-filename filename-without-directory))
          (transfer-link (with-temp-buffer
@@ -147,6 +151,9 @@ If no REMOTE-FILE is given, LOCAL-FILENAME is used."
 
 If a region is active, that region is exported to a file and then
 uploaded, otherwise the complete buffer is uploaded.
+
+ASYNC is a boolean argument: if nil, then upload the region
+synchronously.  Else, upload the region asynchronously.
 
 This function uses `transfer-sh-upload-file' and
 `transfer-sh-upload-file-async'."
@@ -183,11 +190,14 @@ This function uses `transfer-sh-upload-file' and
 If a region is active, use that region, otherwise the complete
 buffer.
 
+ASYNC is a boolean argument: if nil, then upload the region
+synchronously.  Else, upload the region asynchronously.
+
 Query user for the GPG key(s) to use for encryption.  If no key is
 selected by user, then use symmetric encryption (and ask for a
 symmetric passphrase).
 
-The encrypted file is stored in `temporary-file-directory' and
+The encrypted file is stored in variable `temporary-file-directory' and
 uploaded to transfer.sh using `transfer-sh-run-upload-agent'."
   (interactive "P")
   (unless transfer-sh-gpg-keys-hash-table
@@ -233,14 +243,15 @@ uploaded to transfer.sh using `transfer-sh-run-upload-agent'."
 
 ;;;###autoload
 (defun transfer-sh-encrypt-upload-file (local-filename)
-  "Encrypt LOCAL-FILENAME using gpg and upload file to transfer.sh.
+  "Encrypt LOCAL-FILENAME and upload file to transfer.sh.
 
-Query user for the GPG key(s) to use for encryption.  If no key is
-selected by user, then use symmetric encryption (and ask for a
+Query user for the GPG key(s) to use for encryption.  If no key
+is selected by user, then use symmetric encryption (and ask for a
 symmetric passphrase).
 
-The encrypted file is stored in `temporary-file-directory' and uploaded to
-transfer.sh using `transfer-sh-run-upload-agent'."
+The encrypted file is stored in variable
+`temporary-file-directory' and uploaded to transfer.sh using
+`transfer-sh-run-upload-agent'."
   (interactive "ffile: ")
   (unless transfer-sh-gpg-keys-hash-table
     (transfer-sh-refresh-gpg-keys))
@@ -311,5 +322,4 @@ KEY.  Separator between each field is controlled by
 
 
 (provide 'transfer-sh)
-
 ;;; transfer-sh.el ends here
